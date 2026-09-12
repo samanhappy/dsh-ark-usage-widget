@@ -1,0 +1,16 @@
+lib/client.js
+  h_18676a549cd52a 62,199-201,251-255,469-472
+src/client.js
+  h_18676a549cd52a 58,195-197,247-251,465-468
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ff1c5de5d03d81ee7ed2379d7c52f92079da9f52",
+  "prompts": {},
+  "humans": {
+    "h_18676a549cd52a": {
+      "author": "samanhappy <samanhappy@gmail.com>"
+    }
+  }
+}
