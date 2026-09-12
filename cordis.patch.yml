@@ -1,0 +1,12 @@
+# The dsh-ark-usage-widget bundle patch layer.
+#
+# Installed as a profile layer by:
+#   dsh plugin --profile <name> add dsh-ark-usage-widget
+#
+# One row: the trusted host composition plugin that re-creates the usage
+# widget as a dynamic Cordis plugin on every user-facing session start and
+# pre-authorizes its own client Package, so no per-process approval card is
+# shown (equivalent to a statically built client plugin).
+- insert:
+    - id: dsh-ark-usage-widget
+      name: dsh-ark-usage-widget
