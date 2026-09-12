@@ -84,9 +84,9 @@ dsh.profile.bundles ──▶ dsh-ark-usage-widget/cordis.patch.yml
                               ▼
                     id: dsh-ark-usage-widget（宿主组合插件，按包名解析）
                               │
-                              │ 监听 agent/session-start
+                              │ 监听 agent/session-start（每进程仅首个用户会话触发）
                               ▼
-                       动态 Cordis 插件（define → 预授权 → run）
+                       动态 Cordis 插件（define → 预授权 → run，全局唯一）
                               │
               ┌───────────────┴────────────────┐
            Host 半区                       Client 半区
@@ -95,6 +95,7 @@ dsh.profile.bundles ──▶ dsh-ark-usage-widget/cordis.patch.yml
 ```
 
 - 小部件本体是**动态 Cordis 插件**：host 半区用 `ctx.get('subprocess')` 调用 `arkcli`，合并 `usage plan` 与席位里程碑，算出三个周期用量与重置时间；client 半区把 UI 注册进 `sidebar.footer.action` slot，用 `[data-slot]` 锚点把 footer 行压平为 `display:contents`，再靠 `order` 把自己排到设置行下方。
+- 小部件是**全局 UI**：显示账号级用量，与具体会话无关，**每进程只创建一次**（由第一个用户会话触发，之后新开会话不再重复创建，也不会再注入 run 通知）。动态插件仍须归属一个会话（runner API 要求 `sessionId`），归属仅决定谁收到生命周期消息，不影响显示。
 - 之所以保持动态插件而不是静态组合行：浏览器端代码无法从已安装的包里编译进随产品发布的 web bundle（静态 client 行要求从源码 checkout 重建 web 应用），因此由受信的自启插件在每次启动时重建并预授权——这是文档安装方式与「免审批 + 免重建」之间的折中。
 
 ## 说明与限制
