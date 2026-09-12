@@ -55,7 +55,7 @@ const WIDGET_CSS =
   '.arku-spin{animation:arku-spin .8s linear infinite}' +
   '@keyframes arku-spin{to{transform:rotate(360deg)}}' +
   '.arku-sb-title{font-size:12px;font-weight:700}' +
-  '.arku-sb-user{font-size:10px;color:var(--dsw-alias-label-secondary,#94a3b8);font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}' +
+  '.arku-sb-user{font-size:10px;font-weight:400;color:var(--dsw-alias-label-secondary,#94a3b8);font-family:ui-monospace,monospace;white-space:nowrap}' +
   '.arku-card{background:var(--dsw-alias-bg-layer-1,rgb(35,35,36));border:0.5px solid var(--dsw-alias-border-l1,rgba(255,255,255,.06));border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:5px}' +
   '.arku-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}' +
   '.arku-period-name{font-size:12px;font-weight:600}' +
@@ -65,7 +65,6 @@ const WIDGET_CSS =
   '.arku-track{height:6px;border-radius:999px;background:var(--dsw-alias-bg-layer-2,rgb(44,44,46));overflow:hidden;border:0.5px solid var(--dsw-alias-border-l1,rgba(255,255,255,.06))}' +
   '.arku-fill{height:100%;border-radius:999px;transition:width .5s ease}' +
   '.arku-card-bottom{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--dsw-alias-label-secondary,#94a3b8)}' +
-  '.arku-remain b{color:var(--dsw-alias-label-primary,#e2e8f0);font-weight:600}' +
   '.arku-nums{font-family:ui-monospace,monospace}' +
   '.arku-error{background:var(--dsw-alias-bg-layer-1,rgb(35,35,36));border:0.5px solid rgba(242,90,90,.5);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px;align-items:flex-start}' +
   '.arku-error-title{font-size:12px;font-weight:700;color:#fb7185}' +
@@ -193,9 +192,9 @@ function fmtCountdown(str) {
   const hours = Math.floor((diff % 86400000) / 3600000)
   const minutes = Math.floor((diff % 3600000) / 60000)
   const timeStr = pad(d.getHours()) + ':' + pad(d.getMinutes())
-  if (days > 0) return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + timeStr + ' (' + days + '天' + hours + 'h后)'
-  if (sameDay) return '今天 ' + timeStr + ' (' + (hours > 0 ? hours + 'h' : '') + minutes + 'm后)'
-  return (hours > 0 ? hours + 'h' : '') + minutes + 'm后 (' + timeStr + ')'
+  if (days > 0) return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + timeStr + ' (' + days + '天' + (hours > 0 ? hours + '小时' : '') + '后)'
+  if (sameDay) return '今天 ' + timeStr + ' (' + (hours > 0 ? hours + '小时' : '') + minutes + '分钟后)'
+  return (hours > 0 ? hours + '小时' : '') + minutes + '分钟后 (' + timeStr + ')'
 }
 
 function useArkUsage() {
@@ -245,12 +244,11 @@ function PeriodCard(period) {
     h('div', { className: 'arku-track' },
       h('div', { className: 'arku-fill', style: { width: Math.min(100, Math.max(0, period.percent)) + '%', background: barColor(period.percent) } })
     ),
-    h('div', { className: 'arku-card-bottom' },
-      h('span', { className: 'arku-remain' }, '剩余额度: ', h('b', null, period.remaining.toFixed(2) + '%')),
-      period.used !== null && period.total !== null
-        ? h('span', { className: 'arku-nums' }, String(period.used) + ' / ' + String(period.total))
-        : null
-    )
+    period.used !== null && period.total !== null
+      ? h('div', { className: 'arku-card-bottom' },
+        h('span', { className: 'arku-nums' }, String(period.used) + ' / ' + String(period.total))
+      )
+      : null
   )
 }
 
@@ -464,9 +462,11 @@ function SidebarUsage(props) {
       style: { left: popPos.left + 'px', top: popPos.top + 'px' },
     },
       h('div', { className: 'arku-sb-head' },
-        h('span', { className: 'arku-sb-title' }, '火山方舟'),
+        h('span', { className: 'arku-sb-title' },
+          '火山方舟',
+          headUser ? h('span', { className: 'arku-sb-user' }, ' (' + headUser + ')') : null
+        ),
         h('div', { className: 'arku-sb-head-right' },
-          headUser ? h('span', { className: 'arku-sb-user' }, headUser) : null,
           h('button', {
             className: 'arku-sb-refresh',
             disabled: busy,
