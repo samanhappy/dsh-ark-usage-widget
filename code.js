@@ -323,6 +323,24 @@ export const CLIENT_CODE = `return {
       if (percent >= 75) return '#fbbf24'
       return '#34d399'
     }
+    // Water-level color on the existing percentage number (no extra elements):
+    // encodes how the cycle's usage paces against the cycle's elapsed time
+    // (period.cyclePercent, computed host-side from resetAt and window length).
+    //   pace = usage − elapsed-time:
+    //     pace ≤ 0  → 充足 (usage behind schedule; quota ahead of time)  → green
+    //     pace > 0  → 超额使用 (usage ahead of schedule)                 → amber
+    //     pace > 15 → 明显超额                                            → red
+    //   usage ≥ 90 always red (near exhaustion regardless of pacing).
+    function levelColor(p) {
+      const usage = p.percent
+      const elapsed = p.cyclePercent
+      if (usage >= 90) return '#f87171'
+      if (typeof elapsed !== 'number' || !isFinite(elapsed)) return toneColor(usage)
+      const pace = usage - elapsed
+      if (pace > 15) return '#f87171'
+      if (pace > 0) return '#fbbf24'
+      return '#34d399'
+    }
     function barColor(percent) {
       if (percent >= 90) return 'linear-gradient(90deg,#f43f5e,#dc2626)'
       if (percent >= 75) return 'linear-gradient(90deg,#f59e0b,#ea580c)'
@@ -435,7 +453,7 @@ export const CLIENT_CODE = `return {
       return h('div', { className: 'arku-card', key: period.label },
         h('div', { className: 'arku-card-top' },
           h('span', { className: 'arku-period-name' }, period.name),
-          h('span', { className: 'arku-card-pct', title: periodTip(period), style: { color: toneColor(period.percent) } }, period.percent.toFixed(2) + '%')
+          h('span', { className: 'arku-card-pct', title: periodTip(period), style: { color: levelColor(period) } }, period.percent.toFixed(2) + '%')
         ),
         period.resetAt ? h('div', { className: 'arku-reset', title: periodTip(period) },
           h('span', { className: 'arku-reset-dot' }),
@@ -479,7 +497,7 @@ export const CLIENT_CODE = `return {
       for (let i = 0; i < list.length; i++) {
         const p = list[i]
         if (i > 0) children.push(h('span', { className: 'arku-sb-sep', key: 'sep-' + i }, '·'))
-        children.push(h('span', { className: 'arku-sb-pct', key: p.label, title: periodTip(p), style: { color: toneColor(p.percent) } }, p.percent.toFixed(2) + '%'))
+        children.push(h('span', { className: 'arku-sb-pct', key: p.label, title: periodTip(p), style: { color: levelColor(p) } }, p.percent.toFixed(2) + '%'))
       }
       return children
     }
