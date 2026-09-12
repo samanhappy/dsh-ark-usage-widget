@@ -47,7 +47,7 @@ import { HOST_CODE, CLIENT_CODE } from './code.js'
 
 const PLUGIN_PREFIX = 'arku'
 const PLUGIN_NAME = 'Ark Coding Plan 用量'
-const PLUGIN_PURPOSE = '侧边栏底部最下一行用量（设置操作栏下方）：SVG 线条火山图标（currentColor，宽栏 16px / rail 18px）与右侧百分比数字做视觉中心对齐（实测墨迹偏移 0.85px 后修正）；宽栏整行显示三周期两位小数百分比，rail 态仅图标；弹窗左/下与侧边栏和视窗齐平，含 16px SVG 刷新按钮，底部仅显示更新时间。'
+const PLUGIN_PURPOSE = '在侧边栏显示 Ark Coding Plan 用量'
 
 // One global widget per process: the first user-facing session start creates
 // it; all later session starts (including new sessions opened later) no-op.
