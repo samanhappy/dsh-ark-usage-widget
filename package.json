@@ -1,23 +1,31 @@
 {
   "name": "dsh-ark-usage-widget",
-  "version": "0.1.0",
-  "description": "Ark Coding Plan usage widget for DeepSeek Harness: sidebar footer row with SVG volcano icon and two-decimal usage percentages, plus a detail popup with refresh.",
+  "version": "0.2.0",
+  "description": "Ark Coding Plan usage widget for DeepSeek Harness: static sidebar footer row with SVG volcano icon and two-decimal usage percentages, plus a detail popup with refresh. Host route + static client bundle — no dynamic plugin runner, no per-start steering.",
   "type": "module",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
-    "./code.js": "./code.js",
+    "./client": "./lib/client.js",
+    "./src/client.js": "./src/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
   "files": [
     "index.js",
-    "code.js",
+    "src/client.js",
+    "lib/client.js",
     "cordis.patch.yml"
   ],
+  "scripts": {
+    "build": "node build.mjs"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
     }
   },
   "license": "MIT"

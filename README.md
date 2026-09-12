@@ -16,10 +16,12 @@
 
 ```
 dsh-ark-usage-widget/
-├── package.json       # 包声明（dsh.bundle）
-├── cordis.patch.yml   # 安装时注入的插件配置
-├── index.js           # 启动引导
-└── code.js            # 小部件源码（唯一需要修改的文件）
+├── package.json       # 包声明（dsh.bundle + dsh.client）
+├── cordis.patch.yml   # 安装时注入的插件配置（一行双面：host 行 + client 行）
+├── index.js           # HOST 半：注册 /ark-usage 路由，读 arkcli 用量
+├── src/client.js      # CLIENT 半源码（浏览器插件；唯一需要编辑的 UI 文件）
+├── build.mjs          # 把 src/client.js 打成 lib/client.js（node build.mjs）
+└── lib/client.js      # 构建产物，随包分发（client-modules 运行时按此文件组成 __DSH_BOOT__）
 ```
 
 ## 前置条件
@@ -30,7 +32,7 @@ dsh-ark-usage-widget/
    arkcli auth login volc-sso
    arkcli usage plan --format json   # 能返回 JSON 即可
    ```
-3. `pnpm` 在 PATH 上（`dsh plugin` 在 profile 目录内转发给 pnpm）。
+3. 改动 `src/client.js` 后需要 `pnpm build`（或 `node build.mjs`）重新生成 `lib/client.js`。
 
 插件**不保存任何凭据**：它每次通过你本机的 `arkcli` 读取你自己账号的用量。
 
@@ -45,11 +47,11 @@ dsh plugin --profile web add ./dsh-ark-usage-widget
 
 `dsh plugin` 会把包链接进 profile 的依赖，并因为包声明了 `dsh.bundle`，把它追加到 `dsh.profile.bundles` 层列表。然后**重启 DSH** 生效。
 
-也可以从其他来源安装（无需构建，因为本包不带构建脚本）：
+也可以从其他来源安装（`lib/client.js` 是预构建产物，随包分发，无需在目标机上构建）：
 
 ```bash
-pnpm pack                      # 在包目录内打出 dsh-ark-usage-widget-0.1.0.tgz
-dsh plugin --profile web add ./dsh-ark-usage-widget-0.1.0.tgz
+pnpm pack                      # 在包目录内打出 dsh-ark-usage-widget-0.2.0.tgz
+dsh plugin --profile web add ./dsh-ark-usage-widget-0.2.0.tgz
 # 或 git：dsh plugin --profile web add github:<you>/dsh-ark-usage-widget
 # 或 npm：dsh plugin --profile web add dsh-ark-usage-widget
 ```
@@ -57,15 +59,12 @@ dsh plugin --profile web add ./dsh-ark-usage-widget-0.1.0.tgz
 ## 首次运行
 
 1. **重启 DSH**。
-2. 侧边栏底部（设置下方）直接出现用量行 —— **无需手动授权**，插件在启动时自动完成加载。
-3. 若自动加载意外失败（如 DSH 内部接口变动），会回退到标准审批流：界面上点一次**允许**即可。
-
-> 授权在 DSH 中默认不落盘、每次进程重新确认，是保护「AI 动态创建的浏览器代码」的安全边界。本插件通过受信配置自启动加载，浏览器端代码**无提示运行**，请只放入你信任的代码。
+2. 侧边栏底部（设置下方）直接出现用量行 —— **无审批、无提示、无自动对话**。
 
 ## 更新
 
-只改**一个文件**：包目录里的 `code.js`（内含 `HOST_CODE` / `CLIENT_CODE` 两段插件源码）。
-
+- 只改 **两个源文件**：`index.js`（host 半，数据链路）与 `src/client.js`（浏览器 UI）。
+- 改了 `src/client.js` 后先 `node build.mjs` 重新生成 `lib/client.js`（构建产物**已提交**，克隆即可用）。
 - 以本地目录安装时，profile 依赖指向本目录，改完**重启 DSH** 即生效。
 - 以 tarball / git / npm 安装时，改完重新打包并 `dsh plugin --profile web add`（升级覆盖）后重启。
 
@@ -79,17 +78,19 @@ dsh plugin --profile web remove dsh-ark-usage-widget
 
 ## 工作原理
 
-- 小部件由本包在 DSH 启动时自动注册为一个动态插件：后端半区调用本机 `arkcli` 读取账号用量（60s 缓存），前端半区把 UI 挂到侧边栏底部「设置」下方。
-- 小部件是**全局 UI**：显示账号级用量，与具体会话无关，每个进程只创建一次。
-- 之所以采用「启动时动态加载」而非静态内置：浏览器端代码无法从已安装的包直接编入 DSH 随产品发布的网页产物，动态加载是「免审批 + 免重建」的折中。详细实现见 `index.js` 中的注释。
+- **HOST 半**（`index.js`，组合插件行）：注册同源路由 `GET /ark-usage`，经 `connection.requestRejection` 信任围栏（Host/Origin 围栏 + 登录 cookie，与 open-in-app 相同的安全形状）后，调用本机 `arkcli` 读取账号用量（60s 缓存），返回 JSON。
+- **CLIENT 半**（`src/client.js` → `lib/client.js`，`dsh.client` 声明）：**静态浏览器插件**。DSH 的 client-modules 服务在进程启动时扫描 loader 里的 `dsh.client` 行、运行时把预构建的 `lib/client.js` 组成 `window.__DSH_BOOT__` 并 serve —— 与每个内置 UI 行（ui-settings、ui-sidebar…）完全相同的机制。插件向 `sidebar.footer.action` 槽位注册一行 UI，数据经 `fetch('/ark-usage')` 读取，60s 轮询。
+- **为什么没有「每次启动自动注入 cordis-host-runner 上下文 + 自动对话」**：旧版本把 widget 作为**动态 Cordis 插件**在会话启动时自动 define/run。cordis-host-runner 的设计是每次 run 结算后向所属会话 `agent.steer`（带 wake 的用户消息，source 为 `cordis-host-runner`）—— 于是每次 DSH 启动都会向当前会话注入一条该上下文并自动叫醒模型开一轮对话。本版本完全不走动态 runner：没有 define/run/request-run/审批/steering，浏览器半等同于静态内置，用户全程无感。这也是 README 旧版提到「静态内置需重建 web 应用」的替代方案 —— 借助 client-modules 的**运行时** `dsh.client` 扫描，bundle 自带的预构建 client 行不需要重建 DSH 的 web 产物。
+- 小部件是**全局 UI**：显示账号级用量，与具体会话无关，进程内只渲染一次。
 
 ## 说明与限制
 
 - 仅适用于**火山方舟 Coding / Agent Plan** 席位；无席位时显示「无订阅」。
 - 数据链路依赖 `arkcli`，未安装或未登录时浮层会给出对应提示。
-- 每次 DSH 重启由受信配置自动加载，**无需人工点击**；但浏览器端代码等同按配置信任（无人类确认）。
+- 浏览器端代码按「随包分发的受信静态代码」运行，**无人工审批** —— 请只安装你信任的包。
 - 侧边栏位置的实现依赖 DSH 的界面扩展点；DSH 大幅改版后可能需要适配。
+- `/ark-usage` 路由沿用 DSH 的连接信任围栏：仅同源页面可读，DSH 内部接口变动时数据链路可独立降级（浮层显示错误与重试）。
 
 ## 分享
 
-推到 Git 仓库，其他人 `clone` 后按上文安装即可（tarball / git 源皆可）。
+推到 Git 仓库，其他人 `clone` 后按上文安装即可（tarball / git 源皆可，`lib/client.js` 已随包分发）。

@@ -3,10 +3,12 @@
 # Installed as a profile layer by:
 #   dsh plugin --profile <name> add dsh-ark-usage-widget
 #
-# One row: the trusted host composition plugin that re-creates the usage
-# widget as a dynamic Cordis plugin on every user-facing session start and
-# pre-authorizes its own client Package, so no per-process approval card is
-# shown (equivalent to a statically built client plugin).
+# One dual-face row: the HOST half (index.js) registers the /ark-usage route
+# that reads Ark usage through the local `arkcli`; the CLIENT half is declared
+# in the package manifest (`dsh.client` + `exports["./client"]`, built to
+# lib/client.js by `pnpm build`), which the host client-modules service scans
+# into window.__DSH_BOOT__ at runtime. No dynamic Cordis runner is involved,
+# so no cordis-host-runner steering and no auto-started conversation per start.
 - insert:
     - id: dsh-ark-usage-widget
       name: dsh-ark-usage-widget
