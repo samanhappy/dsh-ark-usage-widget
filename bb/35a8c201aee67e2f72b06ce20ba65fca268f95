@@ -1,0 +1,14 @@
+index.js
+  h_18676a549cd52a 50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bb35a8c201aee67e2f72b06ce20ba65fca268f95",
+  "prompts": {},
+  "humans": {
+    "h_18676a549cd52a": {
+      "author": "samanhappy <samanhappy@gmail.com>"
+    }
+  }
+}
