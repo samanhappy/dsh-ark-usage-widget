@@ -1,0 +1,18 @@
+README.md
+  h_18676a549cd52a 5-7,89
+lib/client.js
+  h_18676a549cd52a 47,131-138,141-151,154,157-158,161-165
+src/client.js
+  h_18676a549cd52a 43,127-134,137-147,150,153-154,157-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5dd95826c0a8cec615e440d7e7861e9064ca3da9",
+  "prompts": {},
+  "humans": {
+    "h_18676a549cd52a": {
+      "author": "samanhappy <samanhappy@gmail.com>"
+    }
+  }
+}
