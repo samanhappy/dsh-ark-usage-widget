@@ -194,7 +194,7 @@ function fmtCountdown(str) {
   const timeStr = pad(d.getHours()) + ':' + pad(d.getMinutes())
   if (days > 0) return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + timeStr + ' (' + days + '天' + (hours > 0 ? hours + '小时' : '') + '后)'
   if (sameDay) return '今天 ' + timeStr + ' (' + (hours > 0 ? hours + '小时' : '') + minutes + '分钟后)'
-  return (hours > 0 ? hours + '小时' : '') + minutes + '分钟后 (' + timeStr + ')'
+  return '明天 ' + timeStr + ' (' + (hours > 0 ? hours + '小时' : '') + minutes + '分钟后)'
 }
 
 function useArkUsage() {
