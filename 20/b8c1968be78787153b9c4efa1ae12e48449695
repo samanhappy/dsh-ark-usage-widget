@@ -1,0 +1,21 @@
+lib/client.js
+  s_98b58d9f9a3b05::t_21e9c4b78685c4 201
+src/client.js
+  s_98b58d9f9a3b05::t_855d1b8d404a25 197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "20b8c1968be78787153b9c4efa1ae12e48449695",
+  "prompts": {},
+  "sessions": {
+    "s_98b58d9f9a3b05": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0961e-429a-7180-bff3-aa66c43dbf6d",
+        "model": "gpt-reserve"
+      },
+      "human_author": "samanhappy <samanhappy@gmail.com>"
+    }
+  }
+}
